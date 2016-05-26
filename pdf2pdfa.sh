@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# author: fabian leuthold        
-# date:   2016-05-26
+# author:  fabian leuthold (fabian.leuthold@gmail.com)
+# license: gpl
+# date:    2016-05-26
 
 # this script uses pdfsandwich from tobias elze to process the 
 # current directory and convert all existing non-searchable pdfs 
@@ -10,7 +11,7 @@
 # files and a searchable pdf with the extension *_ocr.pdf will be
 # generated.
 
-# see 'http://www.tobias-elze.de/pdfsandwich/' for details on 
+# please see 'http://www.tobias-elze.de/pdfsandwich/' for details on 
 # pdfsandwich.
 
 #!/bin/bash
