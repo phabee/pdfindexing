@@ -1,35 +1,32 @@
 #!/bin/sh
- 
-# bash tut: http://linuxconfig.org/bash-scripting-tutorial
-# Linux PDF,OCR: http://blog.konradvoelkel.de/2013/03/scan-to-pdfa/
- 
-y="`pwd`/$1"
-echo Will create a searchable PDF for $y
- 
-x=`basename "$y"`
-name=${x%.*}
- 
-mkdir "$name"
-cd "$name"
- 
-# splitting to individual pages
-gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dTextAlphaBits=4 -o out_%04d.jpg -f "$y"
- 
-# process each page
-for f in $( ls *.jpg ); do
-  # extract text
-  tesseract -l eng -psm 3 $f ${f%.*} hocr
- 
-  # remove the “<?xml” line, it disturbed hocr2df
-  grep -v "<?xml" ${f%.*}.html > ${f%.*}.noxml
-  rm ${f%.*}.html 
- 
-  # create a searchable page
-  hocr2pdf -i $f -s -o ${f%.*}.pdf < ${f%.*}.noxml
-  rm ${f%.*}.noxml
-  rm $f
+
+# author: fabian leuthold        
+# date:   2016-05-26
+
+# this script uses pdfsandwich from tobias elze to process the 
+# current directory and convert all existing non-searchable pdfs 
+# to pdf/a files to make them searchable.
+# all pdf's not ending with *_ocr.pdf are considered to be input
+# files and a searchable pdf with the extension *_ocr.pdf will be
+# generated.
+
+# see 'http://www.tobias-elze.de/pdfsandwich/' for details on 
+# pdfsandwich.
+
+#!/bin/bash
+FILES=./*.pdf
+for f in $FILES
+do
+ case $f in
+  *_ocr.pdf)
+   ;;
+  *.pdf)
+   # make sure, no corresponding _ocr.pdf fiile exists
+   ocrchk=$(echo $f | sed "s/.pdf/_ocr.pdf/")
+   if [ ! -e "./$ocrchk" ]; then
+    echo "Processing $f file..."
+    pdfsandwich -rgb $f>/dev/null 2>/dev/null
+   fi;;
+  *)
+ esac
 done
- 
-# combine all pages back to a single file
-# from http://www.ehow.com/how_6874571_merge-pdf-files-ghostscript.html
-gs -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=../${name}_searchable.pdf *.pdf 
